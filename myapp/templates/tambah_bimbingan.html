@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<h3>Tambah Bimbingan</h3>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <p><strong>Durasi Jam Kegiatan:</strong> <span id="durasi-output">0 Jam</span></p>
+
+    <button type="submit" class="btn btn-success">Simpan</button>
+</form>
+
+<script>
+    const mulaiInput = document.getElementById("id_tanggal_mulai");
+    const selesaiInput = document.getElementById("id_tanggal_selesai");
+    const durasiOutput = document.getElementById("durasi-output");
+
+    function hitungDurasi() {
+        const mulai = new Date(mulaiInput.value);
+        const selesai = new Date(selesaiInput.value);
+        if (!isNaN(mulai) && !isNaN(selesai)) {
+            const diffMs = selesai - mulai;
+            if (diffMs >= 0) {
+                const jam = Math.floor(diffMs / 3600000);
+                const menit = Math.floor((diffMs % 3600000) / 60000);
+                durasiOutput.innerText = `${jam} Jam ${menit} Menit`;
+            } else {
+                durasiOutput.innerText = "0 Jam";
+            }
+        }
+    }
+
+    mulaiInput.addEventListener('change', hitungDurasi);
+    selesaiInput.addEventListener('change', hitungDurasi);
+</script>
+{% endblock %}

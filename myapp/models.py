@@ -11,11 +11,13 @@ class CustomUser(AbstractUser):
 
 class Mhs(models.Model):
     id=models.AutoField(primary_key=True)
+    nama_Mhs=models.CharField(max_length=50, null=True)
     nim=models.CharField(max_length=13)
     admin=models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True)
 
 class Pembimbing(models.Model):
     id=models.AutoField(primary_key=True)
+    nama_Dosen=models.CharField(max_length=50, null=True)
     nip=models.CharField(max_length=15)
     admin=models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True)
 
@@ -26,11 +28,15 @@ class AdminIPB(models.Model):
 
 class Penelitian(models.Model):
     penelitian_id=models.AutoField(primary_key=True)
-    nama_Mhs=models.CharField(max_length=50, null=True)
-    nama_Dosen=models.CharField(max_length=50, null=True)
     nim=models.ForeignKey(Mhs, on_delete=models.CASCADE)
     nip=models.ForeignKey(Pembimbing, on_delete=models.CASCADE)
     judul=models.CharField(max_length=150)
+    tanggal_mulai=models.DateTimeField(auto_now=False, auto_now_add=False)
+    
+class milestone(models.Model):
+    id=models.AutoField(primary_key=True)
+    penelitian_id=models.ForeignKey(Penelitian, on_delete=models.CASCADE)
+    deadline=models.DateField(max_length=20)
     STATUS_CHOICES = [
         ('penetapan komisi pembimbing', 'Penetapan Komisi Pembimbing'),
         ('sidang komisi 1', 'Sidang Komisi 1'),
@@ -43,25 +49,23 @@ class Penelitian(models.Model):
         ('publikasi ilmiah', 'Publikasi Ilmiah'),
         ('ujian tesis', 'Ujian Tesis')
     ]
-    status=models.CharField(max_length=50, choices=STATUS_CHOICES, default='Penetapan Komisi Pembimbing')
-    tanggal_mulai=models.DateTimeField(auto_now=False, auto_now_add=False)
-    
-class milestone(models.Model):
-    id=models.AutoField(primary_key=True)
-    penelitian_id=models.ForeignKey(Penelitian, on_delete=models.CASCADE)
-    jenis_milestone=models.CharField(max_length=30)
-    deadline=models.DateField(max_length=20)
-    STATUS_CHOICES = [
+    jenis_milestone=models.CharField(max_length=50, choices=STATUS_CHOICES, default='Penetapan Komisi Pembimbing')
+    STATUS_CHOICES2 = [
         ('ahead of schedule', 'Ahead of Schedule'),
         ('on ideal schedule', 'On Ideal Schedule'),
         ('behind the schedule', 'Behind The Schedule')
     ]
-    status=models.CharField(max_length=30, choices=STATUS_CHOICES, default='ahead of schedule')
+    status=models.CharField(max_length=30, choices=STATUS_CHOICES2, default='ahead of schedule')
 
-class bimbingan(models.Model):
+class Bimbingan(models.Model):
+    TAHUN_SEMESTER_CHOICES = [
+        ('2024/2025 Ganjil', '2024/2025 Ganjil'),
+        ('2024/2025 Genap', '2024/2025 Genap'),
+        ('2025/2026 Ganjil', '2025/2026 Ganjil'),
+    ]
     id=models.AutoField(primary_key=True)
     penelitian_id=models.ForeignKey(Penelitian, on_delete=models.CASCADE)
-    tahun_semester=models.CharField(max_length=20)
+    tahun_semester = models.CharField(max_length=30, choices=TAHUN_SEMESTER_CHOICES)
     nama=models.CharField(max_length=70)
     deskripsi_kegiatan=models.CharField(max_length=200)
     TIPE_PENYELENGGARAAN_CHOICES = [
@@ -74,7 +78,8 @@ class bimbingan(models.Model):
         choices=TIPE_PENYELENGGARAAN_CHOICES,
         default='offline',
     )
-    tanggal=models.DateTimeField()
+    tanggal_mulai=models.DateTimeField()
+    tanggal_selesai=models.DateTimeField()
     komentar=models.CharField(max_length=500)
     STATUS_CHOICES = [
         ('sedang diperiksa', 'Sedang Diperiksa'),
@@ -93,7 +98,7 @@ class bimbingan(models.Model):
     link = models.URLField(
         help_text="URL yang merujuk kepada informasi kegiatan (website, media sosial, drive, dll)"
     )
-    def __str__(self):
+    def _str_(self):
         return self.nama
 
 class Notifikasi(models.Model):
@@ -120,3 +125,24 @@ def save_user_profile(sender,instance,**kwargs):
         instance.pembimbing.save()
     if instance.user_type==3:
         instance.mhs.save()
+        
+@receiver(post_save, sender=Penelitian)
+def buat_milestone_otomatis(sender, instance, created, **kwargs):
+    if created:
+        tahap_list = [
+            'penetapan komisi pembimbing',
+            'sidang komisi 1',
+            'kolokium',
+            'proposal',
+            'penelitian dan bimbingan',
+            'evaluasi dan monitoring',
+            'sidang komisi 2',
+            'seminar',
+            'publikasi ilmiah',
+            'ujian tesis'
+        ]
+        for tahap in tahap_list:
+            milestone.objects.create(
+                penelitian=instance,
+                jenis_milestone=tahap
+            )

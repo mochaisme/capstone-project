@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Mahasiswa Dashboard</title>
-</head>
-<body>
-    <h1>Selamat datang di Mahasiswa Dashboard</h1>
-    <p>Halo, {{ request.user.username }}!</p>
-    <a href="/logout_user">Logout</a>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<div style="text-align: center; margin-top: 50px;">
+    <a href="" class="btn btn-primary">Tambah Bimbingan</a>
+</div>
+{% endblock %}

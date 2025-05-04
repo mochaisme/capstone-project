@@ -7,8 +7,8 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from myapp.EmailBackEnd import EmailBackEnd
-from .forms import MahasiswaRegistrationForm, DosenRegistrationForm
-
+from django.shortcuts import render, redirect
+from .forms import MahasiswaSignUpForm, DosenSignUpForm
 
 # Create your views here.
 def home(request):
@@ -55,22 +55,43 @@ def logout_user(request):
 
 def register_mahasiswa(request):
     if request.method == 'POST':
-        form = MahasiswaRegistrationForm(request.POST)
+        form = MahasiswaSignUpForm(request.POST)
         if form.is_valid():
             form.save()
             return HttpResponse("Mahasiswa berhasil didaftarkan!")
     else:
-        form = MahasiswaRegistrationForm()
+        form = MahasiswaSignUpForm()
     return render(request, 'register_mahasiswa.html', {'form': form})
 
 def register_dosen(request):
     if request.method == 'POST':
-        form = DosenRegistrationForm(request.POST)
+        form = DosenSignUpForm(request.POST)
         if form.is_valid():
             form.save()
             return HttpResponse("Dosen berhasil didaftarkan!")
     else:
-        form = DosenRegistrationForm()
+        form = DosenSignUpForm()
     return render(request, 'register_dosen.html', {'form': form})
 
-    
+# # NEW SECTION HERE
+# from .forms import BimbinganForm
+# from .models import Pembimbing
+# from django.http import JsonResponse
+
+# def mahasiswa_dashboard(request):
+#     return render(request, "mahasiswa_dashboard.html")
+
+# def tambah_bimbingan(request):
+#     if request.method == 'POST':
+#         form = BimbinganForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             form.save()
+#             return HttpResponseRedirect('/mahasiswa_dashboard')
+#     else:
+#         form = BimbinganForm()
+#     return render(request, 'tambah_bimbingan.html', {'form': form})
+
+
+
+
+
