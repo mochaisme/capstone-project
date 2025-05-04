@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.timezone import timedelta  # atau datetime.timedelta jika pakai datetime
 
 # Create your models here.
 
@@ -125,7 +126,7 @@ def save_user_profile(sender,instance,**kwargs):
         instance.pembimbing.save()
     if instance.user_type==3:
         instance.mhs.save()
-        
+
 @receiver(post_save, sender=Penelitian)
 def buat_milestone_otomatis(sender, instance, created, **kwargs):
     if created:
@@ -141,8 +142,13 @@ def buat_milestone_otomatis(sender, instance, created, **kwargs):
             'publikasi ilmiah',
             'ujian tesis'
         ]
-        for tahap in tahap_list:
+
+        # Gunakan tanggal mulai dari Penelitian
+        tanggal_awal = instance.tanggal_mulai
+
+        for i, tahap in enumerate(tahap_list):
             milestone.objects.create(
-                penelitian=instance,
-                jenis_milestone=tahap
+                penelitian_id=instance,
+                jenis_milestone=tahap,
+                deadline=tanggal_awal + timedelta(days=30*(i+1))  # default: 30 hari per tahap, bertingkat
             )

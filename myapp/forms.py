@@ -41,17 +41,30 @@ class DosenSignUpForm(UserCreationForm):
             dosen.save()
         return user
 
-# # NEW SECTION HERE
-# from django import forms
-# from .models import Bimbingan, Pembimbing
+# NEW SECTION HERE
+from django import forms
+from .models import Penelitian, Mhs, Pembimbing
 
-# class BimbinganForm(forms.ModelForm):
-#     tanggal_mulai = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}))
-#     tanggal_selesai = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}))
+class PenelitianForm(forms.ModelForm):
+    nim = forms.ModelChoiceField(
+        queryset=Mhs.objects.all(),
+        label='Mahasiswa',
+        widget=forms.Select,
+    )
+    nip = forms.ModelChoiceField(
+        queryset=Pembimbing.objects.all(),
+        label='Dosen Pembimbing',
+        widget=forms.Select,
+    )
 
-#     class Meta:
-#         model = Bimbingan
-#         fields = [
-#             'tahun_semester', 'nama', 'deskripsi_kegiatan', 'tanggal_mulai', 'tanggal_selesai',
-#             'tipe_penyelenggaraan', 'pembimbing', 'nama_dokumen', 'file', 'link'
-#         ]
+    class Meta:
+        model = Penelitian
+        fields = ['nim', 'nip', 'judul', 'tanggal_mulai']
+        widgets = {
+            'tanggal_mulai': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(PenelitianForm, self).__init__(*args, **kwargs)
+        self.fields['nim'].label_from_instance = lambda obj: f"{obj.nama_Mhs} ({obj.nim})"
+        self.fields['nip'].label_from_instance = lambda obj: f"{obj.nama_Dosen} ({obj.nip})"

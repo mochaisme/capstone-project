@@ -73,23 +73,21 @@ def register_dosen(request):
         form = DosenSignUpForm()
     return render(request, 'register_dosen.html', {'form': form})
 
-# # NEW SECTION HERE
-# from .forms import BimbinganForm
-# from .models import Pembimbing
-# from django.http import JsonResponse
+# NEW SECTION HERE
 
-# def mahasiswa_dashboard(request):
-#     return render(request, "mahasiswa_dashboard.html")
+from django.shortcuts import render, redirect
+from .forms import PenelitianForm
 
-# def tambah_bimbingan(request):
-#     if request.method == 'POST':
-#         form = BimbinganForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             form.save()
-#             return HttpResponseRedirect('/mahasiswa_dashboard')
-#     else:
-#         form = BimbinganForm()
-#     return render(request, 'tambah_bimbingan.html', {'form': form})
+def tambah_penelitian(request):
+    if request.method == 'POST':
+        form = PenelitianForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('tambah_penelitian')  # Ganti sesuai URL tujuan setelah tambah
+    else:
+        form = PenelitianForm()
+    return render(request, 'tambah_penelitian.html', {'form': form})
+
 
 
 
