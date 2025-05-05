@@ -3,11 +3,11 @@ import datetime
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 
 from myapp.EmailBackEnd import EmailBackEnd
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import MahasiswaSignUpForm, DosenSignUpForm
 
 # Create your views here.
@@ -76,7 +76,8 @@ def register_dosen(request):
 # NEW SECTION HERE
 
 from django.shortcuts import render, redirect
-from .forms import PenelitianForm
+from .forms import PenelitianForm, BimbinganForm
+from .models import Penelitian, Mhs
 
 def tambah_penelitian(request):
     if request.method == 'POST':
@@ -87,6 +88,30 @@ def tambah_penelitian(request):
     else:
         form = PenelitianForm()
     return render(request, 'tambah_penelitian.html', {'form': form})
+
+@login_required(login_url='/')
+def tambah_bimbingan(request):
+    try:
+        mahasiswa = get_object_or_404(Mhs, admin=request.user)
+        penelitian = Penelitian.objects.filter(nim=mahasiswa).first()
+
+        if not penelitian:
+            return HttpResponse("Anda belum memiliki penelitian yang terdaftar.")
+
+        if request.method == 'POST':
+            form = BimbinganForm(request.POST, request.FILES)
+            if form.is_valid():
+                bimbingan_obj = form.save(commit=False)
+                bimbingan_obj.penelitian_id = penelitian
+                bimbingan_obj.save()
+                return HttpResponseRedirect('/mahasiswa_dashboard')  # atau redirect kemana pun
+        else:
+            form = BimbinganForm()
+
+        return render(request, 'tambah_bimbingan.html', {'form': form})
+
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}")
 
 
 

@@ -43,7 +43,7 @@ class DosenSignUpForm(UserCreationForm):
 
 # NEW SECTION HERE
 from django import forms
-from .models import Penelitian, Mhs, Pembimbing
+from .models import Penelitian, Mhs, Pembimbing, Bimbingan
 
 class PenelitianForm(forms.ModelForm):
     nim = forms.ModelChoiceField(
@@ -68,3 +68,28 @@ class PenelitianForm(forms.ModelForm):
         super(PenelitianForm, self).__init__(*args, **kwargs)
         self.fields['nim'].label_from_instance = lambda obj: f"{obj.nama_Mhs} ({obj.nim})"
         self.fields['nip'].label_from_instance = lambda obj: f"{obj.nama_Dosen} ({obj.nip})"
+
+class BimbinganForm(forms.ModelForm):
+    class Meta:
+        model = Bimbingan
+        fields = [
+            'tahun_semester',
+            'nama',
+            'deskripsi_kegiatan',
+            'tanggal_mulai',
+            'tanggal_selesai',
+            'tipe_penyelenggaraan',
+            'pembimbing',
+            'nama_dokumen',
+            'file',
+            'link',
+        ]
+        widgets = {
+            'tanggal_mulai': forms.DateInput(attrs={'type': 'datetime-local'}),
+            'tanggal_selesai': forms.DateInput(attrs={'type': 'datetime-local'}),
+            'link': forms.URLInput(attrs={'placeholder': 'Link informasi kegiatan'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super(BimbinganForm, self).__init__(*args, **kwargs)
+        self.fields['pembimbing'].label_from_instance = lambda obj: f"{obj.nama_Dosen} ({obj.nip})"
