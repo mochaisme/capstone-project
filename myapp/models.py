@@ -87,6 +87,7 @@ class Bimbingan(models.Model):
         ('disetujui', 'Disetujui'),
         ('ditolak', 'Ditolak')
     ]
+    status=models.CharField(max_length=50, choices=STATUS_CHOICES, default='Sedang Diperiksa')
     pembimbing=models.ForeignKey(Pembimbing, on_delete=models.CASCADE)
     nama_dokumen = models.CharField(
         max_length=255,
