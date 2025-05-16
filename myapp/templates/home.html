@@ -1,7 +1,0 @@
-{% extends "base.html" %}{% block title %}{% endblock %}
-{% block content %}
-  <h1>Welcome to my Django App</h1>
-  <p>This is the homepage of my Django app.</p>
-  <h2>Selamat datang, {{ request.user.username }}</h2>
-  <p><a href="{% url 'logout' %}">Logout</a></p>
-{% endblock %}
