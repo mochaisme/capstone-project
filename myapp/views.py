@@ -249,7 +249,6 @@ def upload_bukti_milestone(request, milestone_id):
             milestone = form.save(commit=False)
             milestone.tanggal_upload = timezone.now()
             milestone.is_approved = 'pending'
-            milestone.status = 'pending'
             milestone.save()
             return redirect('mahasiswa_dashboard')
 
