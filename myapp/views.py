@@ -23,41 +23,6 @@ def admin_dashboard(request):
 def dosen_dashboard(request):
     return render(request, "dosen_dashboard.html")
 
-def tambah_penelitian(request):
-    if request.method == 'POST':
-        form = PenelitianForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('tambah_penelitian')  # Ganti sesuai URL tujuan setelah tambah
-    else:
-        form = PenelitianForm()
-    return render(request, 'tambah_penelitian.html', {'form': form})
-
-@login_required(login_url='/')
-def tambah_bimbingan(request):
-    try:
-        mahasiswa = get_object_or_404(Mhs, admin=request.user)
-        penelitian = Penelitian.objects.filter(nim=mahasiswa).first()
-
-        if not penelitian:
-            return HttpResponse("Anda belum memiliki penelitian yang terdaftar.")
-
-        if request.method == 'POST':
-            form = BimbinganForm(request.POST, request.FILES)
-            if form.is_valid():
-                bimbingan_obj = form.save(commit=False)
-                bimbingan_obj.penelitian_id = penelitian
-                bimbingan_obj.save()
-                return HttpResponseRedirect('/mahasiswa_dashboard')  # atau redirect kemana pun
-        else:
-            form = BimbinganForm()
-
-        return render(request, 'tambah_bimbingan.html', {'form': form})
-
-    except Exception as e:
-        return HttpResponse(f"Error: {str(e)}")
-
-@login_required
 def mahasiswa_dashboard(request):
     try:
         mhs = get_object_or_404(Mhs, admin=request.user)
@@ -128,6 +93,13 @@ def mahasiswa_dashboard(request):
     except Exception as e:
         return HttpResponse(f"Terjadi error: {str(e)}")
 
+@login_required
+def dosen_dashboard(request):
+    pembimbing = get_object_or_404(Pembimbing, admin=request.user)
+    bimbingan_list = Bimbingan.objects.filter(pembimbing=pembimbing)
+
+    return render(request, 'dosen_dashboard.html', {'bimbingan_list': bimbingan_list})
+
 def doLogin(request):
     if request.method != "POST":
         return HttpResponse("<h2>Method Not Allowed</h2>")
@@ -144,7 +116,6 @@ def doLogin(request):
         else:
             return HttpResponse("Invalid login")
 
-        
 def GetUserDetails(request):
     if request.user!=None:
         return HttpResponse("User : "+request.user.email+" usertype : "+request.user.user_type)
@@ -285,44 +256,13 @@ def upload_bukti_milestone(request, milestone_id):
     else:
         form = BuktiMilestoneForm(instance=milestone)
 
-    return render(request, 'upload_bukti.html', {
-        'form': form,
-        'milestone': milestone
-    })
+        return render(request, 'tambah_bimbingan.html', {'form': form})
+
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}")
 
 
 
-def review_milestone(request, milestone_id):
-    milestone = get_object_or_404(milestone, id=milestone_id)
 
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action == 'approve':
-            milestone.is_approved = 'disetujui'
-            milestone.tanggal_disetujui = timezone.now()
-        elif action == 'reject':
-            milestone.is_approved = 'ditolak'
-        milestone.save()
-        return redirect('dashboard_pembimbing')
 
-    return render(request, 'pembimbing/review_milestone.html', {'milestone': milestone})
 
-# @login_required
-# def approve_milestone(request, milestone_id):
-#     if request.user.user_type == '2':  # pembimbing
-#         ms = milestone.objects.get(id=milestone_id)
-#         ms.is_approved = True
-#         ms.save()
-#         # Mungkin tambahkan notifikasi ke mahasiswa
-#         return redirect('dashboard_pembimbing')
-
-# @login_required
-# def get_available_milestones(penelitian):
-#     ms = milestone.objects.filter(penelitian_id=penelitian).order_by('id')
-#     available = []
-#     for i, m in enumerate(ms):
-#         if i == 0 or ms[i-1].is_approved:
-#             available.append(m)
-#         else:
-#             break  # Tahap sebelumnya belum disetujui, hentikan
-#     return available
