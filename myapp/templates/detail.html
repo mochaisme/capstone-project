@@ -1,0 +1,18 @@
+<!-- templates/bimbingan/detail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detail Bimbingan</title>
+</head>
+<body>
+    <h1>Detail Bimbingan</h1>
+    <p><strong>Tahun Semester:</strong> {{ bimbingan.tahun_semester }}</p>
+    <p><strong>Pembimbing:</strong> {{ bimbingan.pembimbing.nama_Dosen }}</p>
+    <p><strong>Tanggal Mulai:</strong> {{ bimbingan.tanggal_mulai }}</p>
+    <p><strong>Nama Kegiatan:</strong> {{ bimbingan.nama }}</p>
+    <p><strong>Deskripsi:</strong> {{ bimbingan.deskripsi_kegiatan }}</p>
+    <p><strong>Status:</strong> {{ bimbingan.status }}</p>
+
+    <a href="{% url 'mahasiswa_dashboard' %}">Kembali ke Dashboard</a>
+</body>
+</html>

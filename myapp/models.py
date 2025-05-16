@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.timezone import timedelta  # atau datetime.timedelta jika pakai datetime
 
 # Create your models here.
@@ -34,7 +35,7 @@ class Penelitian(models.Model):
     judul=models.CharField(max_length=150)
     tanggal_mulai=models.DateTimeField(auto_now=False, auto_now_add=False)
     
-class milestone(models.Model):
+class Milestone(models.Model):
     id=models.AutoField(primary_key=True)
     penelitian_id=models.ForeignKey(Penelitian, on_delete=models.CASCADE)
     deadline=models.DateField(max_length=20)
@@ -56,7 +57,22 @@ class milestone(models.Model):
         ('on ideal schedule', 'On Ideal Schedule'),
         ('behind the schedule', 'Behind The Schedule')
     ]
+    created_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
     status=models.CharField(max_length=30, choices=STATUS_CHOICES2, default='ahead of schedule')
+    # Upload & Approval
+    bukti_file = models.FileField(upload_to='bukti_milestone/', null=True, blank=True)
+    tanggal_upload = models.DateTimeField(null=True, blank=True)
+    is_approved = models.CharField(
+        max_length=20,
+        choices=[('pending', 'Menunggu'), ('disetujui', 'Disetujui'), ('ditolak', 'Ditolak')],
+        default='pending'
+    )
+    tanggal_disetujui = models.DateTimeField(null=True, blank=True)
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+
 
 class Bimbingan(models.Model):
     TAHUN_SEMESTER_CHOICES = [
@@ -108,6 +124,14 @@ class Notifikasi(models.Model):
     nim=models.ForeignKey(Mhs, on_delete=models.CASCADE)
     isi=models.CharField(max_length=200)
     waktu_kirim=models.DateTimeField(auto_now=False, auto_now_add=False)
+    
+class DeadlineChangeLog(models.Model):
+    milestone = models.ForeignKey(Milestone, on_delete=models.CASCADE)
+    changed_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    old_deadline = models.DateField()
+    new_deadline = models.DateField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
 
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender,instance, created, **kwargs):
@@ -143,13 +167,13 @@ def buat_milestone_otomatis(sender, instance, created, **kwargs):
             'publikasi ilmiah',
             'ujian tesis'
         ]
-
         # Gunakan tanggal mulai dari Penelitian
         tanggal_awal = instance.tanggal_mulai
 
         for i, tahap in enumerate(tahap_list):
-            milestone.objects.create(
+            Milestone.objects.create(
                 penelitian_id=instance,
                 jenis_milestone=tahap,
                 deadline=tanggal_awal + timedelta(days=30*(i+1))  # default: 30 hari per tahap, bertingkat
             )
+
