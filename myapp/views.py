@@ -20,15 +20,11 @@ def showLoginPage(request):
 def admin_dashboard(request):
     return render(request, "admin_dashboard.html")
 
+def dosen_dashboard(request):
+    return render(request, "dosen_dashboard.html")
+
 def mahasiswa_dashboard(request):
     return render(request, "mahasiswa_dashboard.html")
-
-@login_required
-def dosen_dashboard(request):
-    pembimbing = get_object_or_404(Pembimbing, admin=request.user)
-    bimbingan_list = Bimbingan.objects.filter(pembimbing=pembimbing)
-
-    return render(request, 'dosen_dashboard.html', {'bimbingan_list': bimbingan_list})
 
 def doLogin(request):
     if request.method != "POST":
@@ -46,6 +42,7 @@ def doLogin(request):
         else:
             return HttpResponse("Invalid login")
 
+        
 def GetUserDetails(request):
     if request.user!=None:
         return HttpResponse("User : "+request.user.email+" usertype : "+request.user.user_type)
@@ -115,35 +112,6 @@ def tambah_bimbingan(request):
 
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}")
-    
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.utils.timesince import timesince
-from .models import Bimbingan, Pembimbing
-from django.utils.timezone import now
-from django.contrib import messages
-
-@login_required
-def approve_bimbingan(request, pk):
-    bimbingan = get_object_or_404(Bimbingan, pk=pk)
-    bimbingan.status = 'disetujui'
-    bimbingan.save()
-    messages.success(request, "Kegiatan disetujui.")
-    return redirect('dosen_dashboard')
-
-@login_required
-def reject_bimbingan(request, pk):
-    if request.method == 'POST':
-        alasan = request.POST.get('alasan')
-        bimbingan = get_object_or_404(Bimbingan, pk=pk)
-        bimbingan.status = 'ditolak'
-        bimbingan.komentar = alasan
-        bimbingan.alasan_reject = alasan 
-        bimbingan.save()
-        messages.error(request, "Kegiatan ditolak.")
-    return redirect('dosen_dashboard')
-
-
 
 
 
