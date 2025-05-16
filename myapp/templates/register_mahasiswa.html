@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registrasi Mahasiswa</title>
+</head>
+<body>
+    <h2>Registrasi Akun Mahasiswa</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Daftar</button>
+    </form>
+</body>
+</html>
