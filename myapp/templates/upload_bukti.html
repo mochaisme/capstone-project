@@ -1,6 +1,0 @@
-<h3>Upload Bukti untuk {{ milestone.nama }}</h3>
-<form method="POST" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Upload</button>
-</form>
